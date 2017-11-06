@@ -1,0 +1,56 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.emirci.inventapp.content_login">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/userEmailEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/passEditTextCreate"
+            android:layout_alignStart="@+id/passEditTextCreate"
+            android:layout_marginBottom="17dp"
+            android:ems="10"
+            android:hint="Enter Email"
+            android:inputType="textEmailAddress"
+            android:selectAllOnFocus="true"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/passEditTextCreate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/createUserbtn"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="157dp"
+            android:ems="10"
+            android:hint="Enter Password"
+            android:inputType="textVisiblePassword"
+            android:selectAllOnFocus="true"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/createUserbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/moveToLoginBtn"
+            android:layout_alignStart="@+id/passEditTextCreate"
+            android:layout_marginBottom="109dp"
+            android:text="@string/create" />
+
+        <Button
+            android:id="@+id/moveToLoginBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/login" />
+    </RelativeLayout>
+</FrameLayout>
