@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.emirci.inventapp.model.InventoryModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -27,24 +28,26 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Iterator;
+import java.util.List;
+
+//https://www.youtube.com/watch?v=mv-NslL31sk
 
 public class MainActivity extends AppCompatActivity {
 
 
-    Button createUser, moveToLogin;
+    Button createUser, moveToLogin, inventoryBtn;
     EditText userEmailEdit, userPasswordEdit;
+    FirebaseAuth mAuth;
+    FirebaseAuth.AuthStateListener mAuthListener;
 
-    FirebaseAuth firebaseAuth;
-    FirebaseAuth.AuthStateListener authStateListener;
-
-    DatabaseReference mDatabaseref,mUserCheckData;
+    DatabaseReference mDatabaseRef, mUserCheckData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -55,64 +58,79 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        inventoryBtn = (Button) findViewById(R.id.btnInventoryList);
 
         createUser = (Button) findViewById(R.id.createUserbtn);
         moveToLogin = (Button) findViewById(R.id.moveToLoginBtn);
-
         userEmailEdit = (EditText) findViewById(R.id.userEmailEditText);
         userPasswordEdit = (EditText) findViewById(R.id.passEditTextCreate);
 
-        mDatabaseref = FirebaseDatabase.getInstance().getReference();
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mUserCheckData = FirebaseDatabase.getInstance().getReference().child("Users");
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
-        authStateListener = new FirebaseAuth.AuthStateListener() {
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if (user != null) {
 
-                    final  String emailForEver = user.getEmail();
+                    final String emailForEver = user.getEmail();
+
                     mUserCheckData.addValueEventListener(new ValueEventListener() {
+
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            checkUserValidation(dataSnapshot,emailForEver);
+
+                            checkUserValidation(dataSnapshot, emailForEver);
+
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
 
                         }
+
                     });
-
-                    startActivity(new Intent(MainActivity.this, Welcome.class));
-
-
                 } else {
 
                 }
             }
         };
 
+        inventoryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, InventoryesActivity.class));
+            }
+        });
 
         createUser.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
 
                 final String userEmailString, userPassString;
+
+                if (userEmailEdit == null) {
+                    Toast.makeText(MainActivity.this, "Eposta ve şifre yazmalısınız.", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 userEmailString = userEmailEdit.getText().toString().trim();
                 userPassString = userPasswordEdit.getText().toString().trim();
 
                 if (!TextUtils.isEmpty(userEmailString) && !TextUtils.isEmpty(userPassString)) {
-                    firebaseAuth.createUserWithEmailAndPassword(userEmailString, userPassString).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+
+                    mAuth.createUserWithEmailAndPassword(userEmailString, userPassString).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
 
                             if (task.isSuccessful()) {
-                                DatabaseReference mChildDatabase = mDatabaseref.child("Users").push();
+
+                                DatabaseReference mChildDatabase = mDatabaseRef.child("Users").push();
 
                                 String key_user = mChildDatabase.getKey();
 
@@ -121,14 +139,22 @@ public class MainActivity extends AppCompatActivity {
                                 mChildDatabase.child("emailUser").setValue(userEmailString);
                                 mChildDatabase.child("passWordUser").setValue(userPassString);
 
-                                Toast.makeText(MainActivity.this, "User Account Cteated", Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(MainActivity.this, Welcome.class));
+                                Toast.makeText(MainActivity.this, "User Account Created", Toast.LENGTH_LONG).show();
+
+
+                                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+
                             } else {
-                                Toast.makeText(MainActivity.this, "failed user Account not Crated", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Failed to create User Account", Toast.LENGTH_LONG).show();
+
                             }
+
                         }
                     });
+
                 }
+
+
             }
         });
 
@@ -170,25 +196,21 @@ public class MainActivity extends AppCompatActivity {
 
         Iterator iterator = dataSnapshot.getChildren().iterator();
 
-        while (iterator.hasNext())
-        {
+        while (iterator.hasNext()) {
 
             DataSnapshot dataUser = (DataSnapshot) iterator.next();
 
-            if( dataUser.child("emailUser").getValue().toString().equals(emailForVer))
-            {
+            if (dataUser.child("emailUser").getValue().toString().equals(emailForVer)) {
 
-                if (dataUser.child("isVerified").getValue().toString().equals("unverified"))
-                {
+                if (dataUser.child("isVerified").getValue().toString().equals("unverified")) {
 
-                    Intent in = new Intent( MainActivity.this, LoginActivity.class);
-                    in.putExtra("USER_KEY" , dataUser.child("userKey").getValue().toString());
+                    Intent in = new Intent(MainActivity.this, LoginActivity.class);
+                    in.putExtra("USER_KEY", dataUser.child("userKey").getValue().toString());
                     startActivity(in);
 
-                }else
-                {
+                } else {
 
-                    startActivity(new Intent(MainActivity.this, Welcome.class));
+                    startActivity(new Intent(MainActivity.this, WelcomeActivity.class));
 
                 }
 
@@ -201,12 +223,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        firebaseAuth.addAuthStateListener(authStateListener);
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        firebaseAuth.removeAuthStateListener(authStateListener);
+        mAuth.removeAuthStateListener(mAuthListener);
     }
 }

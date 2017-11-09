@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.emirci.inventapp">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".FireApp"
         android:allowBackup="true"
@@ -21,7 +23,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".LoginActivity" />
-        <activity android:name=".Welcome"></activity>
+        <activity android:name=".WelcomeActivity" />
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".InventoryesActivity"></activity>
     </application>
 
 </manifest>
